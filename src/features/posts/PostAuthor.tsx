@@ -4,10 +4,15 @@ import { selectUserById } from '../users'
 
 interface Props {
   userId: string
+  showPrefix?: boolean
 }
 
-export const PostAuthor: React.FC<Props> = ({ userId }) => {
+export const PostAuthor: React.FC<Props> = ({ userId, showPrefix = false }) => {
   const author = useAppSelector((state) => selectUserById(state, userId))
 
-  return <span>by {author?.name ?? 'Unknown author'}</span>
+  return (
+    <span>
+      {showPrefix && 'by'} {author?.name ?? 'Unknown author'}
+    </span>
+  )
 }

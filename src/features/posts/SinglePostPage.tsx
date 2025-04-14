@@ -5,14 +5,14 @@ import { selectPostById } from './slice'
 import { PostAuthor } from './PostAuthor'
 import { TimeAgo } from './TimeAgo'
 import { ReactionButtons } from './ReactionButtons'
-import { selectCurrentUsername } from '../auth'
+import { selectCurrentUser } from '../users'
 
 export const SinglePostPage: React.FC = () => {
   const { postId } = useParams()
   const post = useAppSelector((state) => selectPostById(state, postId!))
 
-  const currentUsername = useAppSelector(selectCurrentUsername)
-  const canEdit = currentUsername === post?.user
+  const user = useAppSelector(selectCurrentUser)
+  const canEdit = user?.name === post?.user
 
   return (
     <section>

@@ -1,29 +1,41 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit'
+import { client } from '@/api/client'
+import { createAppAsyncThunk } from '@/hooks/store'
+import { createSlice } from '@reduxjs/toolkit'
 
-interface AuthState {
-  username: string | null
+interface StoreState {
+  id: string | null
 }
 
-const initialState: AuthState = {
-  username: null,
+export const login = createAppAsyncThunk('auth/login', async (id: string) => {
+  await client.post('fakeApi/login', { id })
+  return id
+})
+
+export const logout = createAppAsyncThunk('auth/logout', async () => {
+  await client.post('fakeApi/logout', {})
+})
+
+const initialState: StoreState = {
+  id: null,
 }
 
 export const slice = createSlice({
   name: 'auth',
   initialState,
-  reducers: {
-    userLoggedIn: (state, { payload }: PayloadAction<string>) => {
-      state.username = payload
-    },
-    userLoggedOut: (state) => {
-      state.username = null
-    },
+  reducers: {},
+  extraReducers: (builder) => {
+    builder
+      .addCase(login.fulfilled, (state, { payload }) => {
+        state.id = payload
+      })
+      .addCase(logout.fulfilled, (state) => {
+        state.id = null
+      })
   },
   selectors: {
-    selectCurrentUsername: (state) => state.username,
+    selectCurrentUserId: (state) => state.id,
   },
 })
 
-export const { selectCurrentUsername } = slice.selectors
-export const { userLoggedIn, userLoggedOut } = slice.actions
+export const { selectCurrentUserId } = slice.selectors
 export default slice.reducer

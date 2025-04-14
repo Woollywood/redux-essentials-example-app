@@ -1,24 +1,27 @@
 import { RootState } from '@/store'
-import { createSlice } from '@reduxjs/toolkit'
-import { selectCurrentUsername } from '../auth'
-import { AsyncState } from '@/types/store'
+import { createSlice, createEntityAdapter } from '@reduxjs/toolkit'
+import { AsyncStateEntity } from '@/types/store'
 import { createAppAsyncThunk } from '@/hooks/store'
 import { client } from '@/api/client'
+import { selectCurrentUserId } from '../auth'
 
-interface User {
+export interface User {
   id: string
-  name: string
+  firstName: String
+  lastName: String
+  name: String
+  username: String
+  posts: string
 }
 
-interface StoreState extends AsyncState {
-  users: User[]
-}
+type StoreState = AsyncStateEntity<User, string>
 
-const initialState: StoreState = {
-  users: [],
+const adapter = createEntityAdapter<User>()
+
+const initialState: StoreState = adapter.getInitialState({
   status: 'idle',
   error: null,
-}
+})
 
 export const fetchUsers = createAppAsyncThunk('users/fetchUsers', async () => {
   const { data } = await client.get<User[]>('/fakeApi/users')
@@ -38,22 +41,23 @@ export const slice = createSlice({
       .addCase(fetchUsers.fulfilled, (state, { payload }) => {
         state.status = 'succeeded'
         state.error = null
-        state.users = payload
+        adapter.setAll(state, payload)
       })
       .addCase(fetchUsers.rejected, (state, { error }) => {
         state.status = 'failed'
         state.error = error.message ?? 'Unknown error'
       })
   },
-  selectors: {
-    selectAllUsers: (state) => state.users,
-    selectUserById: (state, userId: string | null) => state.users.find(({ id }) => id === userId),
-  },
 })
 
-export const { selectAllUsers, selectUserById } = slice.selectors
+export const { selectAll: selectAllUsers, selectById: selectUserById } = adapter.getSelectors(
+  (state: RootState) => state.users,
+)
 export const selectCurrentUser = (state: RootState) => {
-  const currentUsername = selectCurrentUsername(state)
-  return selectUserById(state, currentUsername)
+  const currentUserId = selectCurrentUserId(state)
+  if (!currentUserId) {
+    return
+  }
+  return selectUserById(state, currentUserId)
 }
 export default slice.reducer

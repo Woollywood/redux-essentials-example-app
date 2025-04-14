@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useAppDispatch, useAppSelector } from '@/hooks/store'
-import { selectCurrentUsername } from '../auth'
+import { selectCurrentUserId } from '../auth'
 import { createNewPost } from './slice'
 
 interface AddPostFormFields extends HTMLFormControlsCollection {
@@ -16,7 +16,7 @@ interface AddPostFormElements extends HTMLFormElement {
 export const AddPostForm: React.FC = () => {
   const [status, setStatus] = useState<'idle' | 'pending'>('idle')
 
-  const userId = useAppSelector(selectCurrentUsername)!
+  const userId = useAppSelector(selectCurrentUserId)!
   const dispatch = useAppDispatch()
 
   const handleSubmit = async (e: React.FormEvent<AddPostFormElements>) => {

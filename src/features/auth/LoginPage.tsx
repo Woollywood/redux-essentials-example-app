@@ -2,8 +2,8 @@ import { useAppDispatch, useAppSelector } from '@/hooks/store'
 import React, { useEffect } from 'react'
 import { fetchUsers, selectAllUsers } from '../users'
 import { useNavigate } from 'react-router-dom'
-import { userLoggedIn } from './slice'
 import { Spinner } from '@/components/Spinner'
+import { login } from './slice'
 
 interface LoginPageFormFields extends HTMLFormControlsCollection {
   username: HTMLSelectElement
@@ -14,19 +14,20 @@ interface LoginPageFormElements extends HTMLFormElement {
 
 export const LoginPage: React.FC = () => {
   const dispatch = useAppDispatch()
-  const { users, status, error } = useAppSelector((state) => state.users)
+  const { status, error } = useAppSelector((state) => state.users)
+  const users = useAppSelector(selectAllUsers)
   const navigate = useNavigate()
 
   useEffect(() => {
     dispatch(fetchUsers())
   }, [])
 
-  const handleSubmit = (e: React.FormEvent<LoginPageFormElements>) => {
+  const handleSubmit = async (e: React.FormEvent<LoginPageFormElements>) => {
     e.preventDefault()
 
     const username = e.currentTarget.elements.username.value
 
-    dispatch(userLoggedIn(username))
+    await dispatch(login(username))
     navigate('/posts')
   }
 
