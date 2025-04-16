@@ -1,25 +1,26 @@
-import React, { useEffect } from 'react'
-import { useAppDispatch, useAppSelector } from '@/hooks/store'
-import { fetchPosts, selectPostsIds } from './slice'
+import React, { useMemo } from 'react'
+
 import { Spinner } from '@/components/Spinner'
 import { PostExcerpt } from './PostExcerpt'
+import { useGetPostsQuery } from '../api/slice'
+import classNames from 'classnames'
 
 export const PostsList: React.FC = () => {
-  const { status, error } = useAppSelector((state) => state.posts)
-  const posts = useAppSelector(selectPostsIds)
-
-  const dispatch = useAppDispatch()
-
-  useEffect(() => {
-    dispatch(fetchPosts())
-  }, [])
+  const { data: posts = [], isLoading, isFetching, isSuccess, isError, error, refetch } = useGetPostsQuery()
+  const orderedPosts = useMemo(() => posts.slice().sort((a, b) => b.date.localeCompare(a.date)), [posts])
 
   return (
     <section className="posts-list">
       <h2>Posts</h2>
-      {status === 'pending' && <Spinner text="Loading..." />}
-      {status === 'failed' && <div>{error}</div>}
-      {status === 'succeeded' && posts.map((id) => <PostExcerpt key={id} id={id} />)}
+      {isLoading && <Spinner text="Loading..." />}
+      {isError && <div>{JSON.stringify(error)}</div>}
+      {isSuccess && (
+        <div className={classNames('posts-container', { disabled: isFetching })}>
+          {orderedPosts.map((post) => (
+            <PostExcerpt key={post.id} {...post} />
+          ))}
+        </div>
+      )}
     </section>
   )
 }

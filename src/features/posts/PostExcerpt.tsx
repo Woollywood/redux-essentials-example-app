@@ -1,21 +1,17 @@
 import React from 'react'
-import { Post, selectPostById } from './slice'
+import { Post } from './slice'
 import { PostAuthor } from './PostAuthor'
 import { TimeAgo } from './TimeAgo'
 import { Link } from 'react-router-dom'
 import { ReactionButtons } from './ReactionButtons'
-import { useAppSelector } from '@/hooks/store'
 
-interface Props {
-  id: string
+interface Props extends Post {
   isDetail?: boolean
 }
 
-export const PostExcerpt: React.FC<Props> = ({ id, isDetail = false }) => {
-  const { user, date, title, content } = useAppSelector((state) => selectPostById(state, id))
-
+export const PostExcerpt: React.FC<Props> = ({ id, user, date, title, content, isDetail = false }) => {
   return (
-    <article className="post-excerpt" key={id}>
+    <article className="post-excerpt">
       <PostAuthor showPrefix userId={user} />
       <TimeAgo timestamp={date} />
       {!isDetail ? (
